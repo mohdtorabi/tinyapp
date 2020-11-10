@@ -29,20 +29,23 @@ app.post("/urls", (req, res) => {
   const newShortURL = generateRandomString();
   const newLongURL = req.body.longURL;
   urlDatabase[newShortURL] = newLongURL;
-  
+  const templateVars = { shortURL: newShortURL, longURL: newLongURL};
+  res.render("urls_show", templateVars);
 });
 
+
+
 // deleting the url
-app.post("/urls/:shortURL/delete", (req, res) =>{
-  
-  delete urlDatabase[req.params.shortURL];
-  res.redirect('/urls');
-});
+
 
 //saying hello at hello page.
 app.get("/", (req, res) => {
   res.send("Hello!");
 
+});
+
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
 });
 
 //bringing html style to urls page
@@ -63,9 +66,17 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-app.get("/urls/new", (req, res) => {
+app.post("/urls/:shortURL/edit", (req, res) => {
+  console.log(req.body.longURL);
+  console.log(req.params.shortURL);
+  urlDatabase[req.params.shortURL] = req.body.longURL;
+  res.redirect("/urls/");
 
-  res.render("urls_new");
+});
+
+app.post("/urls/:shortURL/delete", (req, res) =>{
+  delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
 });
 
 app.get("/urls.json", (req, res) => {
