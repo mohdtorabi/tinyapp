@@ -35,8 +35,8 @@ app.post("/urls", (req, res) => {
 // deleting the url
 app.post("/urls/:shortURL/delete", (req, res) =>{
   
-  delete { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
-  res.redirect("/urls");
+  delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
 });
 
 //saying hello at hello page.
