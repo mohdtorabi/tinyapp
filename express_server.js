@@ -35,7 +35,7 @@ app.post("/urls", (req, res) => {
   const newShortURL = generateRandomString();
   const newLongURL = req.body.longURL;
   urlDatabase[newShortURL] = newLongURL;
-  const templateVars = { shortURL: newShortURL, longURL: newLongURL};
+  const templateVars = { shortURL: newShortURL, longURL: newLongURL, username: req.body.username};
   res.render("urls_show", templateVars);
 });
 
@@ -47,7 +47,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie["username", req.body.username];
+  res.clearCookie("username", {username: req.body.username});
   res.redirect("/urls");
 });
 
