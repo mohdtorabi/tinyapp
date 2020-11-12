@@ -14,10 +14,10 @@
     </div>
     <% if(user){ %>
       <form class= "form-inline justify-content-center" method="POST" action="/logout">
-        <label style="width: 200px; margin: 5px;" > Logged In As: <%=user.email%> </label>
+        <label style="width: 200px; margin: 5px;" > Logged In As: <%=users[user].email%> </label>
         <button type="Submit" class="btn btn-dark">Log out</button>
       </form>
-    <% } else{ %>  
+    <% } else{ %> 
       <a class="nav-item nav-link" href="/register">Register</a>
         <a class="nav-item nav-link" href="/login">Log In</a>
    <% } %>
