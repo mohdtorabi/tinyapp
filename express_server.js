@@ -61,7 +61,17 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie("url_login", req.body.username);
+  //const templateVars = {user: users[req.cookies["user_ID"]]};
+  const email = req.body.email;
+  const password = req.body.password;
+  const foundUser = findUserByEmail(email);
+  if (!foundUser) {
+    return res.status(403).send("Password or username was incorrect!");
+  }
+  if (foundUser.password !== password) {
+    return res.status(403).send("Password or username was incorrect!");
+  }
+  res.cookie("user_ID", foundUser.id);
   res.redirect("/urls");
 });
 
@@ -77,10 +87,7 @@ app.get("/", (req, res) => {
 
 });
 //making new urls
-app.get("/urls/new", (req, res) => {
-  const templateVars = {user: users[req.cookies["user_ID"]]};
-  res.render("urls_new", templateVars);
-});
+
 
 app.get("/register", (req, res) => {
   const templateVars = {user: users[req.cookies["user_ID"]]};
@@ -121,8 +128,13 @@ app.post("/urls", (req, res) => {
   const newShortURL = generateRandomString();
   const newLongURL = req.body.longURL;
   urlDatabase[newShortURL] = newLongURL;
-  const templateVars = { shortURL: newShortURL, longURL: newLongURL };
+  const templateVars = { shortURL: newShortURL, longURL: newLongURL, user: users[req.cookies["user_ID"]] };
   res.render("urls_show", templateVars);
+});
+
+app.get("/urls/new", (req, res) => {
+  const templateVars = {user: users[req.cookies["user_ID"]]};
+  res.render("urls_new", templateVars);
 });
 
 //bringing html style to new pages
@@ -139,8 +151,6 @@ app.get("/u/:shortURL", (req, res) => {
 
 //updating the urls
 app.post("/urls/:shortURL/edit", (req, res) => {
-  /* console.log(req.body.longURL);
-  console.log(req.params.shortURL); */
   urlDatabase[req.params.shortURL] = req.body.longURL;
   res.redirect("/urls/");
 
