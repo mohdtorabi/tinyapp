@@ -16,6 +16,15 @@ const generateRandomString = () => {
   return result;
 };
 
+const findUserByEmail = (email) => {
+  for (const user in users) {
+    const userID = users[user];
+    if (userID.email === email) {
+      return userID;
+    }
+  }
+  return null;
+};
 
 
 app.set("view engine", "ejs");
@@ -46,10 +55,13 @@ app.use(bodyParser.urlencoded({extended: true}));
 //adding new sumbiteed longURL and assigned random shortURL
 
 
-
+app.get("/login", (req, res) => {
+  const templateVars = {user: users[req.cookies["user_ID"]]};
+  res.render("urls_login", templateVars);
+});
 
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
+  res.cookie("url_login", req.body.username);
   res.redirect("/urls");
 });
 
@@ -57,8 +69,6 @@ app.post("/logout", (req, res) => {
   res.clearCookie("user_ID");
   res.redirect("/urls");
 });
-
-
 
 
 //saying hello at hello page.
@@ -84,8 +94,18 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password,
   };
+  if (!newUser.email || !newUser.password) {
+    
+    res.statusCode = 400;
+    return res.send("Email or Password was not found. Please try again!");
+  }
+  const foundUser = findUserByEmail(newUser.email);
+  if (foundUser) {
+    
+    res.status(400).send("Email has been registered!");
+  }
   users[id] = newUser;
-  console.log(users[id]);
+
   res.cookie("user_ID", newUser.id);
   res.redirect("/urls");
 });
