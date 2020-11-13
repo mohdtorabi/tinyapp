@@ -9,6 +9,13 @@ const findUserByEmail = (email, users) => {
   return null;
 };
 
+const findUserByID = (ownerID, userID) => {
+  if (ownerID === userID) {
+    return true;
+  }
+  return false;
+};
+
 const generateRandomString = () => {
   let result = '';
  
@@ -52,4 +59,4 @@ const users = {
 };
 
 
-module.exports = {findUserByEmail, generateRandomString,urlsForUser, users, urlDatabase};
+module.exports = {findUserByEmail, generateRandomString,urlsForUser, findUserByID, users, urlDatabase};

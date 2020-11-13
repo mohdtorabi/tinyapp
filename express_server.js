@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 const bcrypt = require('bcrypt');
-const { generateRandomString, findUserByEmail, urlsForUser, users, urlDatabase} = require("./helpers");
+const { generateRandomString, findUserByEmail, urlsForUser, findUserByID, users, urlDatabase} = require("./helpers");
 const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
 const { request } = require('express');
@@ -127,18 +127,26 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.put("/urls/:shortURL/edit", (req, res) => {
-  if (urlsForUser(req.session.user_ID)) {
+  const ownerID = urlDatabase[req.params.shortURL]["userID"];
+  const user_ID = req.session.user_ID;
+  if (findUserByID(ownerID, user_ID)) {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
     res.redirect("/urls/");
+  } else {
+    res.status(403).send("Shorturl does not exist");
   }
 
 });
 
 //deleting the urls
 app.delete("/urls/:shortURL/delete", (req, res) =>{
-  if (urlsForUser(req.session.user_ID)) {
+  const ownerID = urlDatabase[req.params.shortURL]["userID"];
+  const user_ID = req.session.user_ID;
+  if (findUserByID(ownerID, user_ID)) {
     delete urlDatabase[req.params.shortURL];
     res.redirect('/urls');
+  } else {
+    res.status(403).send("Shorturl does not exist");
   }
 });
 
