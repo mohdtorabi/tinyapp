@@ -6,7 +6,11 @@ const { generateRandomString, findUserByEmail, urlsForUser, users, urlDatabase} 
 const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
 const { request } = require('express');
+const methodOverride = require('method-override');
 
+app.use(methodOverride('_method'));
+
+// .use and .set for packages installed
 app.use(cookieSession({
   name: 'session',
   keys: ["lilduck"],
@@ -114,7 +118,6 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.session.user_ID]};
-  
   res.render("urls_show", templateVars);
 });
 
@@ -123,7 +126,7 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-app.post("/urls/:shortURL/edit", (req, res) => {
+app.put("/urls/:shortURL/edit", (req, res) => {
   if (urlsForUser(req.session.user_ID)) {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
     res.redirect("/urls/");
@@ -132,7 +135,7 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 });
 
 //deleting the urls
-app.post("/urls/:shortURL/delete", (req, res) =>{
+app.delete("/urls/:shortURL/delete", (req, res) =>{
   if (urlsForUser(req.session.user_ID)) {
     delete urlDatabase[req.params.shortURL];
     res.redirect('/urls');
