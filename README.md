@@ -9,10 +9,13 @@ TinyApp is a full stack web application built with Node and Express that allows 
 !["Home page"](https://github.com/mohdtorabi/tinyapp/blob/main/docs/Home-Directory.png?raw=true)
 
 
+## Tech Stack
+- Programming languages : JavaScript (Node.js)
+- middleware : Express
+- Database : local Object Database(no Database)
+
 ## Dependencies
 
-- Node.js
-- Express
 - EJS
 - bcrypt
 - body-parser

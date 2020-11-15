@@ -19,7 +19,7 @@ const findUserByID = (ownerID, userID) => {
 const generateRandomString = () => {
   let result = '';
  
-  let alphanumeric = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const alphanumeric = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   for (let i = 6; i > 0; --i) {
     result += alphanumeric[Math.floor(Math.random() * alphanumeric.length)];
   }
@@ -41,21 +41,9 @@ const urlsForUser = (id) => {
 
 //DATABASE
 const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID:"userRandomID"},
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
 const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "123"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
 };
 
 

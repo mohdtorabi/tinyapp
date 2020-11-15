@@ -10,7 +10,7 @@ const methodOverride = require('method-override');
 
 app.use(methodOverride('_method'));
 
-// .use and .set for packages installed
+
 app.use(cookieSession({
   name: 'session',
   keys: ["lilduck"],
@@ -23,9 +23,17 @@ app.set("view engine", "ejs");
 
 
 //GET and POST login and logout
+app.get("/", (req, res) => {
+  const userID = req.session.userID;
+  if (userID) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/register");
+  }
+});
+
 app.get("/login", (req, res) => {
-  
-  const templateVars = {user: users[req.session.user_ID]};
+  const templateVars = {user: users[req.session.userID]};
   res.render("urls_login", templateVars);
 });
 
@@ -38,11 +46,14 @@ app.post("/login", (req, res) => {
   if (!foundUser) {
     return res.status(403).send("Password or username was incorrect!");
   }
+  if (!password) {
+    return res.status(403).send("Password or username was incorrect!");
+  }
   if (bcrypt.compareSync(password, hashedPassword) === false) {
     return res.status(403).send("Password or username was incorrect!");
   }
   
-  req.session.user_ID = foundUser.id;
+  req.session.userID = foundUser.id;
   res.redirect("/urls");
 });
 
@@ -55,7 +66,7 @@ app.post("/logout", (req, res) => {
 //GET and POST register
 
 app.get("/register", (req, res) => {
-  const templateVars = {user: users[req.session.user_ID]};
+  const templateVars = {user: users[req.session.userID]};
   res.render("urls_register", templateVars);
 });
 
@@ -72,34 +83,34 @@ app.post("/register", (req, res) => {
     res.statusCode = 400;
     return res.send("Email or Password was not found. Please try again!");
   }
-  const foundUser = findUserByEmail(newUser.email);
+  const foundUser = findUserByEmail(newUser.email, users);
   if (foundUser) {
     
     res.status(400).send("Email has been registered!");
   }
+  if (!password) {
+    return res.status(403).send("Username or password not found!");
+  }
   users[id] = newUser;
 
-  req.session.user_ID = newUser.id;
+  req.session.userID = newUser.id;
   res.redirect("/urls");
 });
 
 
 
-//GET and POST urls
 app.get("/urls", (req, res) => {
-  //const user = users[req.session];
-  //const userURL = urlsForUser(req.session);
-  const templateVars = {users: users, user: users[req.session.user_ID], userURL: urlsForUser(req.session.user_ID), urls: urlDatabase};
+  const templateVars = {users: users, user: users[req.session.userID], userURL: urlsForUser(req.session.userID), urls: urlDatabase};
   res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
   const newShortURL = generateRandomString();
   const newLongURL = req.body.longURL;
-  const user = users[req.session.user_ID];
+  const user = users[req.session.userID];
   urlDatabase[newShortURL] = {longURL: newLongURL, userID: user.id};
-  const templateVars = { shortURL: newShortURL, longURL: newLongURL, user: users[req.session.user_ID] };
-  res.render("urls_show", templateVars);
+  //const templateVars = { shortURL: newShortURL, longURL: newLongURL, user: users[req.session.userID] };
+  res.redirect("/urls");
 });
 
 
@@ -107,29 +118,30 @@ app.post("/urls", (req, res) => {
 //GET and POST urls/extensions(new, shorturl, u/shorturl, edit, delete)
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = {user: users[req.session.user_ID]};
-  //const email = req.body.email;
-  //const foundUser = findUserByEmail(email);
-  if (!users[req.session.user_ID]) {
+  const templateVars = {user: users[req.session.userID]};
+  if (!users[req.session.userID]) {
     return res.redirect("/login");
   }
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.session.user_ID]};
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.session.userID]};
+  if (!users[req.session.userID]) {
+    return res.redirect("/login");
+  }
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
 app.put("/urls/:shortURL/edit", (req, res) => {
   const ownerID = urlDatabase[req.params.shortURL]["userID"];
-  const user_ID = req.session.user_ID;
-  if (findUserByID(ownerID, user_ID)) {
+  const userID = req.session.userID;
+  if (findUserByID(ownerID, userID)) {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
     res.redirect("/urls/");
   } else {
@@ -138,11 +150,11 @@ app.put("/urls/:shortURL/edit", (req, res) => {
 
 });
 
-//deleting the urls
+
 app.delete("/urls/:shortURL/delete", (req, res) =>{
   const ownerID = urlDatabase[req.params.shortURL]["userID"];
-  const user_ID = req.session.user_ID;
-  if (findUserByID(ownerID, user_ID)) {
+  const userID = req.session.userID;
+  if (findUserByID(ownerID, userID)) {
     delete urlDatabase[req.params.shortURL];
     res.redirect('/urls');
   } else {
@@ -151,7 +163,6 @@ app.delete("/urls/:shortURL/delete", (req, res) =>{
 });
 
 
-//GET for JSON
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
