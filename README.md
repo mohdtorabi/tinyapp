@@ -18,6 +18,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 - EJS
 - bcrypt
+- bcryptjs
 - body-parser
 - cookie-session
 
