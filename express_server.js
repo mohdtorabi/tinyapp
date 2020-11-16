@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 const express = require('express');
 const app = express();
 const PORT = 8080;
@@ -5,7 +12,6 @@ const bcrypt = require('bcrypt');
 const { generateRandomString, findUserByEmail, urlsForUser, findUserByID, users, urlDatabase} = require("./helpers");
 const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
-const { request } = require('express');
 const methodOverride = require('method-override');
 
 app.use(methodOverride('_method'));
@@ -41,15 +47,14 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10);
   const foundUser = findUserByEmail(email, users);
   if (!foundUser) {
-    return res.status(403).send("Password or username was incorrect!");
+    return res.status(403).send("Username or password not found!");
   }
   if (!password) {
-    return res.status(403).send("Password or username was incorrect!");
+    return res.status(403).send("Username or password not found!");
   }
-  if (bcrypt.compareSync(password, hashedPassword) === false) {
+  if (bcrypt.compareSync(password, foundUser.password) === false) {
     return res.status(403).send("Password or username was incorrect!");
   }
   
@@ -109,7 +114,6 @@ app.post("/urls", (req, res) => {
   const newLongURL = req.body.longURL;
   const user = users[req.session.userID];
   urlDatabase[newShortURL] = {longURL: newLongURL, userID: user.id};
-  //const templateVars = { shortURL: newShortURL, longURL: newLongURL, user: users[req.session.userID] };
   res.redirect("/urls");
 });
 
@@ -126,7 +130,12 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  const ownerID = urlDatabase[req.params.shortURL]["userID"];
+  const userID = req.session.userID;
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.session.userID]};
+  if (!findUserByID(ownerID, userID)) {
+    res.status(403).send("Shorturl does not exist");
+  }
   if (!users[req.session.userID]) {
     return res.redirect("/login");
   }
